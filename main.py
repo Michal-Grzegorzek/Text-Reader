@@ -35,7 +35,12 @@ label.pack()
 def upload_image():
     global pdf_path
     pdf_path = filedialog.askopenfilename(initialdir=os.getcwd())
-    print(pdf_path)
+    b1['state'] = 'normal'
+    b2['state'] = 'normal'
+    b3['state'] = 'normal'
+    b4['state'] = 'normal'
+    messagebox.showinfo(title="Success", message="Success file uploaded.")
+
 
 
 def check_type_start():
@@ -116,8 +121,22 @@ def pdf_doc():
         pygame.mixer.music.play()
 
 
+def pause_unpause():
+    if b2['text'] == 'PAUSE':
+        pygame.mixer.music.pause()
+        b2['text'] = 'UNPAUSE'
+    else:
+        pygame.mixer.music.unpause()
+        b2['text'] = 'PAUSE'
+
+
+def reset():
+    pygame.mixer.music.stop()
+    b2['text'] = 'PAUSE'
+
+
 # Stwórz obiekt Combobox z dwoma opcjami: 'pdf' i 'mój własny tekst'
-choose_type = ttk.Combobox(root, values=['PDF', 'Text'], state='readonly')
+choose_type = ttk.Combobox(root, values=['PDF', 'Text'], state='readonly', width=20)
 choose_type.set('Choose Type')
 # choose_type.pack(side=LEFT, padx=5, pady=10)
 choose_type.place(x=5, y=275)
@@ -126,7 +145,7 @@ choose_type.place(x=5, y=275)
 choose_type.bind("<<ComboboxSelected>>", on_choose_type_select)
 
 
-choose_language = ttk.Combobox(root, values=['en', 'de', 'fr', 'pl', 'es'], state='readonly')
+choose_language = ttk.Combobox(root, values=['en', 'de', 'fr', 'pl', 'es'], state='readonly', width=20)
 choose_language.set('Choose Language')
 choose_language.place(x=160, y=275)
 
@@ -134,20 +153,28 @@ choose_language.place(x=160, y=275)
 choose_language.bind("<<ComboboxSelected>>", on_choose_language_select)
 
 
-enter_text = ttk.Entry(width=30, bootstyle="info", state='disabled')
+enter_text = ttk.Entry(width=22, bootstyle="info", state='disabled')
 enter_text.place(x=315, y=275)
 enter_text.bind('<Button-1>', clear_entry)
 
 
-btn_select_image = ttk.Button(root, text="Select Image", width=12, bootstyle=SUCCESS, state='disabled', command=upload_image)
-btn_select_image.place(x=515, y=275)
+btn_select_image = ttk.Button(root, text="Select Image", width=20, bootstyle=INFO, state='disabled', command=upload_image)
+btn_select_image.place(x=470, y=275)
 
 
-b1 = ttk.Button(root, text="START", bootstyle=SUCCESS, command=check_type_start, width=20)
+b1 = ttk.Button(root, text="START", bootstyle=SUCCESS, command=check_type_start, width=20, state='disabled')
 b1.place(x=5, y=310)
 
 
-b2 = ttk.Button(root, text="STOP", bootstyle=(DANGER, OUTLINE), command=pdf_doc, width=20)
+b2 = ttk.Button(root, text="PAUSE", bootstyle=(SECONDARY, OUTLINE), command=pause_unpause, width=20, state='disabled')
 b2.place(x=160, y=310)
+
+
+b3 = ttk.Button(root, text="RESET", bootstyle=(DANGER, OUTLINE), command=reset, width=20, state='disabled')
+b3.place(x=315, y=310)
+
+
+b4 = ttk.Button(root, text="SAVE", bootstyle=(WARNING, OUTLINE), command=pdf_doc, width=20, state='disabled')
+b4.place(x=470, y=310)
 
 root.mainloop()
