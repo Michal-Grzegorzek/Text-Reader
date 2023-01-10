@@ -11,6 +11,7 @@ from tkinter.filedialog import asksaveasfilename
 import os
 from PIL import Image, ImageTk
 
+tts = None
 pdf_path = None
 language = 'en'
 
@@ -35,23 +36,26 @@ label.pack()
 def upload_image():
     global pdf_path
     pdf_path = filedialog.askopenfilename(initialdir=os.getcwd())
-    b1['state'] = 'normal'
-    b2['state'] = 'normal'
-    b3['state'] = 'normal'
-    b4['state'] = 'normal'
-    messagebox.showinfo(title="Success", message="Success file uploaded.")
+    print(pdf_path)
+    if os.path.splitext(pdf_path)[1] != '.pdf':
+        messagebox.showinfo(title="Pdf file not detected.", message="This is not a PDF file.")
+        pdf_path = None
+    elif pdf_path != '':
+        messagebox.showinfo(title="Success", message="Success file uploaded.")
+
 
 
 
 def check_type_start():
     selected = choose_type.get()
+    b2['text'] = 'PAUSE'
 
     if selected == 'PDF':
         pdf_doc()
     elif selected == 'Text':
         text_doc()
     else:
-        pass
+        messagebox.showinfo(title="Choose Type", message="Choose type: Text or PDF.")
 
 
 
@@ -80,11 +84,13 @@ def on_choose_language_select(event):
     global language
     language = choose_language.get()
 
+
 def clear_entry(event):
     enter_text.delete(0, 'end')
 
 
 def text_doc():
+    global tts
 
     if '' == enter_text.get() or enter_text.get() == 'Enter Text':
         messagebox.showinfo(title="Empty filed", message="Please don't leave empty filed.")
@@ -100,28 +106,33 @@ def text_doc():
 
 
 def pdf_doc():
-    pygame.init()
-    pygame.mixer.init()
-    with open(pdf_path, 'rb') as f:
-        # Wczytaj plik PDF
-        pdf_reader = PyPDF2.PdfReader(f)
-        # Pobierz wszystkie arkusze
-        pages = pdf_reader.pages
-        # Utwórz tekst z wszystkich arkuszy
-        text = ''
-        for page in pages:
-            text += page.extract_text()
-        # Utwórz obiekt gTTS z tekstem
-        tts = gTTS(text, lang=language)
-        # Zapisz mowę syntetyczną do pliku MP3
-        # tts.save('document.mp3')
-        mp3_fo = BytesIO()
-        tts.write_to_fp(mp3_fo)
-        pygame.mixer.music.load(mp3_fo, 'mp3')
-        pygame.mixer.music.play()
+
+    if pdf_path == None:
+        messagebox.showinfo(title="Select a document", message="First select a document.")
+    else:
+        pygame.init()
+        pygame.mixer.init()
+        with open(pdf_path, 'rb') as f:
+            # Wczytaj plik PDF
+            pdf_reader = PyPDF2.PdfReader(f)
+            # Pobierz wszystkie arkusze
+            pages = pdf_reader.pages
+            # Utwórz tekst z wszystkich arkuszy
+            text = ''
+            for page in pages:
+                text += page.extract_text()
+            # Utwórz obiekt gTTS z tekstem
+            tts = gTTS(text, lang=language)
+            # Zapisz mowę syntetyczną do pliku MP3
+            # tts.save('document.mp3')
+            mp3_fo = BytesIO()
+            tts.write_to_fp(mp3_fo)
+            pygame.mixer.music.load(mp3_fo, 'mp3')
+            pygame.mixer.music.play()
 
 
 def pause_unpause():
+
     if b2['text'] == 'PAUSE':
         pygame.mixer.music.pause()
         b2['text'] = 'UNPAUSE'
@@ -131,8 +142,21 @@ def pause_unpause():
 
 
 def reset():
+    global pdf_path, tts
     pygame.mixer.music.stop()
     b2['text'] = 'PAUSE'
+    pdf_path = None
+    enter_text.delete(0, 'end')
+    tts = None
+
+
+def save():
+    if tts != None:
+        filename = filedialog.asksaveasfilename(initialdir=os.getcwd())
+        if filename:
+            tts.save(f'{filename}.mp3')
+    else:
+        messagebox.showinfo(title="Start", message="Press first start.")
 
 
 # Stwórz obiekt Combobox z dwoma opcjami: 'pdf' i 'mój własny tekst'
@@ -158,23 +182,23 @@ enter_text.place(x=315, y=275)
 enter_text.bind('<Button-1>', clear_entry)
 
 
-btn_select_image = ttk.Button(root, text="Select Image", width=20, bootstyle=INFO, state='disabled', command=upload_image)
+btn_select_image = ttk.Button(root, text="Select Document", width=20, bootstyle=INFO, state='disabled', command=upload_image)
 btn_select_image.place(x=470, y=275)
 
 
-b1 = ttk.Button(root, text="START", bootstyle=SUCCESS, command=check_type_start, width=20, state='disabled')
+b1 = ttk.Button(root, text="START", bootstyle=SUCCESS, command=check_type_start, width=20)
 b1.place(x=5, y=310)
 
 
-b2 = ttk.Button(root, text="PAUSE", bootstyle=(SECONDARY, OUTLINE), command=pause_unpause, width=20, state='disabled')
+b2 = ttk.Button(root, text="PAUSE", bootstyle=(SECONDARY, OUTLINE), command=pause_unpause, width=20)
 b2.place(x=160, y=310)
 
 
-b3 = ttk.Button(root, text="RESET", bootstyle=(DANGER, OUTLINE), command=reset, width=20, state='disabled')
+b3 = ttk.Button(root, text="RESET", bootstyle=(DANGER, OUTLINE), command=reset, width=20)
 b3.place(x=315, y=310)
 
 
-b4 = ttk.Button(root, text="SAVE", bootstyle=(WARNING, OUTLINE), command=pdf_doc, width=20, state='disabled')
+b4 = ttk.Button(root, text="SAVE", bootstyle=(WARNING, OUTLINE), command=save, width=20)
 b4.place(x=470, y=310)
 
 root.mainloop()
