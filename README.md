@@ -8,6 +8,11 @@ The application allows the user to select the language in which the sound is gen
 
 The application sets the icon of its window to the 'favicon.ico' file and sets the background of the window to the 'Text_Reader_background.png' file.
 
+Using the PyInstaller library, I created an executable file that can be run without the need for a Python interpreter on the user's computer.
+
+The executable file located is in this repository: https://github.com/Michal-Grzegorzek/Text-Reader-Desktop-App-Executable-File.git
+
+Download all files to one folder and run the main.exe.
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/93224108/212181267-0918e06a-fd9e-4869-9802-3830f7bd0a9a.png" style="display: block; margin: 0 auto;">
